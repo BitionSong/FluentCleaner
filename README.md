@@ -63,8 +63,6 @@ Older versions of both are available in [Releases](https://github.com/builtbybel
 
 > 💬 **Classic or Modern?** [Vote here](https://github.com/builtbybel/FluentCleaner/discussions/100) — curious which one people actually end up using day to day.
 
-> 🔒 **Why isn't Classic open source yet?** [Read the project note](FluentCleaner.Classic/WHY_CLASSIC_IS_CLOSED_SOURCE.md).
-
 ## ❤️ Support
 
 no company behind this, no investors, no marketing department. just one person building a tool because the alternative got worse every year. every bit of support helps keep it going
