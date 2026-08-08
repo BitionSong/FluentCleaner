@@ -1,4 +1,4 @@
-# FluentCleaner Classic — User Guide
+# FluentCleaner Classic | User Guide
 
 > Old-school shell. Current cleaning engine.
 
