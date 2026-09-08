@@ -59,7 +59,19 @@ FluentCleaner comes in two flavors. Same cleaning engine and winapp2.ini parser 
 
 **Not sure which one to grab?** If you want the modern look and don't mind installing the Windows App SDK once, go with the main version. If you want something tiny, portable, and framework-dependent (or you're on an older/locked-down machine), grab Classic.
 
-Older versions of both are available in [Releases](https://github.com/builtbybel/FluentCleaner/releases).
+### Install with WinGet
+
+The modern **WinUI 3 edition** is also available through Windows Package Manager:
+
+```powershell
+winget install --id Builtbybel.FluentCleaner --exact
+```
+
+Already installed? Update to the latest release with:
+```powershell
+winget upgrade --id Builtbybel.FluentCleaner --exact
+```
+_WinGet currently installs the modern edition. FluentCleaner Classic remains available as a portable download._
 
 > 💬 **Classic or Modern?** [Vote here](https://github.com/builtbybel/FluentCleaner/discussions/100) — curious which one people actually end up using day to day.
 
