@@ -82,6 +82,7 @@
     "Cookies_MiRemove": "移除",
     "Cookies_MiImport": "导入…",
     "Cookies_MiExport": "导出…",
+    "Cookies_MiSelectAll": "全选",
     "Cookies_TextFileFilter": "文本文件 (*.txt)|*.txt|所有文件 (*.*)|*.*",
     "Options_DonationTitle": "支持 FluentCleaner 经典版",
     "Options_DonationMessage": "FluentCleaner 对所有人免费。支持者版是回馈开发者的可选版本，可以在关于页面显示你的署名并移除赞助提示。",

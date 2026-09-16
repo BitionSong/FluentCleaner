@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using FluentCleaner.Services;
 using FluentCleaner.ViewModels;
 using Microsoft.UI.Xaml;
@@ -11,12 +12,23 @@ namespace FluentCleaner.Views;
 public sealed partial class SettingsPage : Page, IPageActions
 {
     private static readonly HttpClient _http = new();
+    private static readonly Dictionary<string, int[]> DonationAmounts = new()
+    {
+        ["EUR"] = [5, 10, 25, 50, 100, 200, 500, 1000],
+        ["USD"] = [5, 10, 25, 50, 100, 200, 500, 1000],
+        ["GBP"] = [5, 10, 25, 50, 100, 200, 500, 1000],
+        ["CHF"] = [5, 10, 25, 50, 100, 200, 500, 1000],
+        ["CAD"] = [10, 20, 50, 100, 200, 400, 750, 1500],
+        ["AUD"] = [10, 20, 50, 100, 200, 400, 750, 1500],
+        ["JPY"] = [500, 1000, 2500, 5000, 10000, 20000, 50000, 100000, 150000]
+    };
     private string? _updateVersion; // null = up to date, string = new version available
     private bool _pageReady; // true when the page has finished loading and is ready to handle events
     private string _groqKey = "";
     private string _openAiKey = "";
     private string _anthropicKey = "";
     private string _currentProvider = "Groq";
+    private bool _navigationReady;
 
     public SettingsPageViewModel ViewModel { get; } = new();
     public string AppVersion => AppInfo.DisplayVersion;
@@ -25,6 +37,9 @@ public sealed partial class SettingsPage : Page, IPageActions
     public SettingsPage()
     {
         InitializeComponent();
+        _navigationReady = true;
+        ShowSettingsSection("General");
+        InitializeDonationOptions();
         AiProviderBox.ItemsSource = new[] { "Groq", "OpenAI", "Anthropic" };
         Loaded += async (_, _) =>
         {
@@ -42,6 +57,29 @@ public sealed partial class SettingsPage : Page, IPageActions
 
             _pageReady = true;
         };
+    }
+
+    // The settings page has one local navigator and one content surface. Keeping the
+    // sections here avoids a second Frame/router while still killing the long one-pager.
+    private void SettingsNav_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_navigationReady || SettingsNav.SelectedItem is not ListViewItem item) return;
+        ShowSettingsSection(item.Tag as string ?? "General");
+    }
+
+    private void ShowSettingsSection(string section)
+    {
+        AppearanceSection.Visibility = DatabaseSection.Visibility =
+            section == "General" ? Visibility.Visible : Visibility.Collapsed;
+        CookiesSection.Visibility = section == "Cookies" ? Visibility.Visible : Visibility.Collapsed;
+        ExclusionsSection.Visibility = section == "Exclusions" ? Visibility.Visible : Visibility.Collapsed;
+        PostCleanSection.Visibility = section == "Tasks" ? Visibility.Visible : Visibility.Collapsed;
+        HistorySection.Visibility = section == "History" ? Visibility.Visible : Visibility.Collapsed;
+        AiSection.Visibility = section == "AI" ? Visibility.Visible : Visibility.Collapsed;
+        SchedulerSection.Visibility = section == "Scheduler" ? Visibility.Visible : Visibility.Collapsed;
+        BackupSection.Visibility = AboutSection.Visibility =
+            section == "About" ? Visibility.Visible : Visibility.Collapsed;
+        SettingsScroll.ChangeView(null, 0, null, true);
     }
 
     private async void LangCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -123,10 +161,35 @@ public sealed partial class SettingsPage : Page, IPageActions
     private void DonationBanner_Dismiss(object sender, RoutedEventArgs e) =>
         DonationBanner.IsOpen = false;
 
+    private void InitializeDonationOptions()
+    {
+        DonationCurrencyBox.ItemsSource = DonationAmounts.Keys;
+
+        var localCurrency = RegionInfo.CurrentRegion.ISOCurrencySymbol;
+        DonationCurrencyBox.SelectedItem = DonationAmounts.ContainsKey(localCurrency)
+            ? localCurrency
+            : "EUR";
+    }
+
+    private void DonationCurrencyBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (DonationCurrencyBox.SelectedItem is not string currency) return;
+
+        DonationAmountBox.ItemsSource = DonationAmounts[currency];
+        DonationAmountBox.SelectedIndex = 1; // sensible second tier for every currency
+    }
+
     private async void Link_GitHub(object sender, RoutedEventArgs e)   => await AppLinks.OpenAsync(AppLinks.GitHub);
     private async void Link_Issues(object sender, RoutedEventArgs e)   => await AppLinks.OpenAsync(AppLinks.Issues);
     private async void Link_Releases(object sender, RoutedEventArgs e) => await AppLinks.OpenAsync(AppLinks.Releases);
-    private async void Link_Donate(object sender, RoutedEventArgs e)   => await AppLinks.OpenAsync(AppLinks.Donate);
+    private async void Link_Donate(object sender, RoutedEventArgs e)
+    {
+        if (DonationAmountBox.SelectedItem is not int amount ||
+            DonationCurrencyBox.SelectedItem is not string currency)
+            return;
+
+        await AppLinks.OpenAsync(AppLinks.CreatePayPalDonationUrl(amount, currency));
+    }
     private async void Link_KoFi(object sender, RoutedEventArgs e)     => await AppLinks.OpenAsync(AppLinks.KoFi);
     private async void Link_Faq(object sender, RoutedEventArgs e)        => await AppLinks.OpenAsync(AppLinks.Faq);
     private async void Link_IconCredit(object sender, RoutedEventArgs e) => await AppLinks.OpenAsync(AppLinks.IconCredit);
@@ -391,6 +454,7 @@ public sealed partial class SettingsPage : Page, IPageActions
         {
             AppSettings.ImportFrom(file.Path);
             ViewModel.Refresh();
+            CookiesSection.ReloadSettings();
             ViewModel.StatusText = ResourceService.Fmt("St_ImportSuccess", file.Name);
         }
         catch (Exception ex) { ViewModel.StatusText = ResourceService.Fmt("St_ImportFailed", ex.Message); }

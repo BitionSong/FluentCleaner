@@ -179,6 +179,22 @@ public class CleaningService
             token.ThrowIfCancellationRequested(); //stop between files so we never delete half an entry
             try
             {
+                // A keep-list replaces Winapp2's whole-file delete for known browser stores.
+                // CookieService owns the SQL work and blocks unsafe fallback deletion.
+                var cookieClean = CookieService.TryCleanProtectedStore(
+                    file, AppSettings.Instance.CookieDomainsToKeep);
+                if (cookieClean.Handled)
+                {
+                    if (cookieClean.Succeeded)
+                    {
+                        count += cookieClean.CookiesRemoved;
+                        bytes += cookieClean.BytesFreed;
+                        if (cookieClean.CookiesRemoved > 0)
+                            progress?.Report(ResourceService.Fmt("Cleaning_CleanedCookies", cookieClean.CookiesRemoved, file));
+                    }
+                    continue;
+                }
+
                 var size = new FileInfo(file).Length;
                 File.Delete(file);
                 count++;

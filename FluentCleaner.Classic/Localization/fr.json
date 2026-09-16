@@ -82,6 +82,7 @@
     "Cookies_MiRemove":  "Retirer",
     "Cookies_MiImport":  "Importer...",
     "Cookies_MiExport":  "Exporter...",
+    "Cookies_MiSelectAll":  "Tout sélectionner",
     "Cookies_TextFileFilter":  "fichiers Texte (*.txt)|*.txt|Tous les fichiers (*.*)|*.*",
     "Options_DonationTitle":  "Soutenez FluentCleaner Classic !",
     "Options_DonationMessage":  "FluentCleaner reste gratuit pour tous. L'édition « Supporter » est une simple marque de reconnaissance envers ceux qui soutiennent volontairement son développement. Elle ajoute le nom de votre choix dans la section « À propos » et supprime les rappels de soutien.",

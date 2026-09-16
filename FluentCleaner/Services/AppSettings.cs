@@ -55,6 +55,9 @@ public class AppSettings
     public bool         GlobalExclusionsEnabled { get; set; } = false;
     public List<string> GlobalExclusions        { get; set; } = [];
 
+    // Website domains protected by the Cookie Manager during browser cleaning.
+    public List<string> CookieDomainsToKeep { get; set; } = [];
+
     // backdrop style;terminal-only tweak, no Settings UI on purpose
     public string Backdrop { get; set; } = "mica";
 
